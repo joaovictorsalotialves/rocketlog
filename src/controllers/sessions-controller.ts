@@ -1,7 +1,9 @@
 import { compare } from 'bcrypt'
 import type { Request, Response } from 'express'
+import { sign } from 'jsonwebtoken'
 import { z } from 'zod'
 
+import { authConfig } from '@/configs/auth'
 import { prisma } from '@/database/prisma'
 import { AppError } from '@/utils/AppError'
 
@@ -30,8 +32,16 @@ class SessionsController {
       throw new AppError('Invalid credentials', 401)
     }
 
-    return response.json({ message: 'OK' })
+    const { secret, expiresIn } = authConfig.jwt
+
+    const token = sign({ role: user.role ?? 'customer' }, secret, {
+      subject: user.id,
+      expiresIn,
+    })
+
+    return response.json({ token })
   }
 }
 
 export { SessionsController }
+;('')
