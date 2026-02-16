@@ -1,7 +1,35 @@
+import { compare } from 'bcrypt'
 import type { Request, Response } from 'express'
+import { z } from 'zod'
+
+import { prisma } from '@/database/prisma'
+import { AppError } from '@/utils/AppError'
 
 class SessionsController {
-  create(request: Request, response: Response) {
+  async create(request: Request, response: Response) {
+    const bodySchema = z.object({
+      email: z.string().email(),
+      password: z.string().min(6),
+    })
+
+    const { email, password } = bodySchema.parse(request.body)
+
+    const user = await prisma.user.findFirst({
+      where: {
+        email,
+      },
+    })
+
+    if (!user) {
+      throw new AppError('Invalid credentials', 401)
+    }
+
+    const passwordMatched = await compare(password, user.password)
+
+    if (!passwordMatched) {
+      throw new AppError('Invalid credentials', 401)
+    }
+
     return response.json({ message: 'OK' })
   }
 }
