@@ -1,8 +1,9 @@
+import { hash } from 'bcrypt'
 import type { Request, Response } from 'express'
 import { z } from 'zod'
 
 class UsersController {
-  create(request: Request, response: Response) {
+  async create(request: Request, response: Response) {
     const bodySchema = z.object({
       name: z.string().trim().min(3),
       email: z.string().email(),
@@ -11,7 +12,9 @@ class UsersController {
 
     const { name, email, password } = bodySchema.parse(request.body)
 
-    return response.json({ message: 'Ok' })
+    const hashedPassword = await hash(password, 8)
+
+    return response.json({ message: 'Ok', hashedPassword })
   }
 }
 
