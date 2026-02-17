@@ -27,4 +27,15 @@ describe('UsersController', () => {
 
     user_id = response.body.id
   })
+
+  it('should throw an error if user with same email already exists', async () => {
+    const response = await request(app).post('/users').send({
+      name: 'Duplicate User',
+      email: 'test@example.com',
+      password: 'password123',
+    })
+
+    expect(response.status).toBe(409)
+    expect(response.body.message).toBe('User with same email already exists')
+  })
 })
