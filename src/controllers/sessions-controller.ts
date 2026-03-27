@@ -1,6 +1,6 @@
 import { compare } from 'bcrypt'
 import type { Request, Response } from 'express'
-import { sign } from 'jsonwebtoken'
+import { sign, SignOptions } from 'jsonwebtoken'
 import { z } from 'zod'
 
 import { authConfig } from '@/configs/auth'
@@ -37,7 +37,7 @@ class SessionsController {
     const token = sign({ role: user.role ?? 'customer' }, secret, {
       subject: user.id,
       expiresIn,
-    })
+    } as SignOptions)
 
     const { password: hashedPassword, ...userWithoutPassword } = user
 
